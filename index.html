@@ -77,6 +77,13 @@
       80% { transform: translate(2px, -4px); }
       90% { transform: translate(-6px, 2px); }
     }
+    #corpo {
+      transition: transform 0.3s ease-out;
+      transform-origin: 296px 530px;
+    }
+    #corpo.inflated {
+      transition: transform 0.25s ease-out;
+    }
     #eat-feedback {
       position: absolute;
       font-size: 28px;
@@ -235,12 +242,15 @@
       const EAT_DIST = 70;
 
       const EXPLOSION_TRIGGERS = [1, 3, 5, 7, 11, 13];
+      const INFLATE_STEP = 0.09;
 
       let eatenCount = 0;
       let explosionTarget = pickExplosionTarget();
       let isExploded = false;
       let isEating = false;
+      let fullness = 1;
       const originalTransforms = new Map();
+      const corpo = svgEl.querySelector('#corpo');
 
       function pickExplosionTarget() {
         return EXPLOSION_TRIGGERS[Math.floor(Math.random() * EXPLOSION_TRIGGERS.length)];
@@ -374,12 +384,20 @@
         eatFeedback.className = 'active';
         setTimeout(() => { eatFeedback.className = ''; }, 700);
 
+        inflateBody();
+
         setTimeout(() => {
           isEating = false;
           if (eatenCount >= explosionTarget) {
             triggerExplosion();
           }
         }, 350);
+      }
+
+      function inflateBody() {
+        fullness += INFLATE_STEP;
+        corpo.classList.add('inflated');
+        corpo.setAttribute('transform', `scale(${fullness})`);
       }
 
       function triggerExplosion() {
@@ -420,6 +438,12 @@
         svgEl.classList.remove('svg-explode');
         explosionOverlay.innerHTML = '';
         shakeOverlay.className = '';
+        fullness = 1;
+        corpo.classList.remove('inflated');
+        corpo.setAttribute('transform', '');
+        corpo.style.transition = 'none';
+        void corpo.offsetWidth;
+        corpo.style.transition = '';
 
         svgEl.querySelectorAll('.draggable-letter').forEach(g => {
           g.dataset.eaten = 'false';
