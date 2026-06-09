@@ -79,10 +79,16 @@
     }
     #corpo {
       transition: transform 0.3s ease-out;
-      transform-origin: 296px 530px;
+      transform-origin: 296px 434px;
     }
     #corpo.inflated {
-      transition: transform 0.25s ease-out;
+      transition: transform 0.2s ease-out;
+    }
+    #gambe {
+      transition: transform 0.3s ease-out;
+    }
+    #gambe.inflated {
+      transition: transform 0.2s ease-out;
     }
     #eat-feedback {
       position: absolute;
@@ -242,7 +248,7 @@
       const EAT_DIST = 70;
 
       const EXPLOSION_TRIGGERS = [1, 3, 5, 7, 11, 13];
-      const INFLATE_STEP = 0.09;
+      const INFLATE_STEP = 0.05;
 
       let eatenCount = 0;
       let explosionTarget = pickExplosionTarget();
@@ -251,6 +257,7 @@
       let fullness = 1;
       const originalTransforms = new Map();
       const corpo = svgEl.querySelector('#corpo');
+      const gambe = svgEl.querySelector('#gambe');
 
       function pickExplosionTarget() {
         return EXPLOSION_TRIGGERS[Math.floor(Math.random() * EXPLOSION_TRIGGERS.length)];
@@ -397,7 +404,10 @@
       function inflateBody() {
         fullness += INFLATE_STEP;
         corpo.classList.add('inflated');
+        gambe.classList.add('inflated');
+        const dy = 136 * (fullness - 1);
         corpo.setAttribute('transform', `scale(${fullness})`);
+        gambe.setAttribute('transform', `translate(0, ${dy})`);
       }
 
       function triggerExplosion() {
@@ -440,10 +450,15 @@
         shakeOverlay.className = '';
         fullness = 1;
         corpo.classList.remove('inflated');
+        gambe.classList.remove('inflated');
         corpo.setAttribute('transform', '');
+        gambe.setAttribute('transform', '');
         corpo.style.transition = 'none';
-        void corpo.offsetWidth;
+        gambe.style.transition = 'none';
+        void corpo.offsetLeft;
+        void gambe.offsetLeft;
         corpo.style.transition = '';
+        gambe.style.transition = '';
 
         svgEl.querySelectorAll('.draggable-letter').forEach(g => {
           g.dataset.eaten = 'false';
