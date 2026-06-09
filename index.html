@@ -238,6 +238,15 @@
       color: #753e90;
       font-family: Arial, Helvetica, sans-serif;
     }
+    #capacity {
+      position: absolute;
+      top: 42px;
+      right: 16px;
+      z-index: 20;
+      font-size: 14px;
+      color: #753e90;
+      font-family: Arial, Helvetica, sans-serif;
+    }
   </style>
 </head>
 <body>
@@ -386,7 +395,9 @@
       function initDrag() {
         const groups = svgEl.querySelectorAll('.draggable-letter');
         groups.forEach(g => {
-          originalTransforms.set(g, g.getAttribute('transform') || '');
+          const existing = g.getAttribute('transform') || '';
+          g.setAttribute('transform', existing ? `${existing} translate(0, 30)` : 'translate(0, 30)');
+          originalTransforms.set(g, g.getAttribute('transform'));
         });
 
         let dragEl = null;
