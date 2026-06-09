@@ -12,7 +12,6 @@
       align-items: center;
       min-height: 100vh;
       background: #222;
-      font-family: Arial, Helvetica, sans-serif;
       overflow: hidden;
       user-select: none;
     }
@@ -29,34 +28,12 @@
       display: block;
       width: 100%;
       height: 100%;
-      pointer-events: none;
     }
-    .letter {
-      position: absolute;
-      font-size: 42px;
-      font-weight: 900;
-      color: #e83f5c;
+    .draggable-letter {
       cursor: grab;
-      z-index: 10;
-      text-shadow: 2px 2px 0 #ef80b1, 4px 4px 0 rgba(0,0,0,0.15);
-      transition: transform 0.15s ease;
-      touch-action: none;
-      transform-origin: center center;
     }
-    .letter:hover {
-      transform: scale(1.15);
-    }
-    .letter.dragging {
+    .draggable-letter.dragging {
       cursor: grabbing;
-      z-index: 100;
-      transform: scale(1.25);
-      transition: none;
-    }
-    .letter.eaten {
-      transition: transform 0.4s ease-in, opacity 0.4s ease-in;
-      transform: scale(0) !important;
-      opacity: 0;
-      pointer-events: none;
     }
     #explosion-overlay {
       position: absolute;
@@ -76,17 +53,6 @@
     @keyframes particleFly {
       0% { opacity: 1; transform: translate(0,0) scale(1); }
       100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.3); }
-    }
-    .debris {
-      position: absolute;
-      font-size: 32px;
-      font-weight: 900;
-      color: #753e90;
-      animation: debrisFly 1.5s ease-out forwards;
-    }
-    @keyframes debrisFly {
-      0% { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
-      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(0.2); }
     }
     #shake-overlay {
       position: absolute;
@@ -113,9 +79,7 @@
     }
     #eat-feedback {
       position: absolute;
-      font-size: 24px;
-      font-weight: bold;
-      color: #e83f5c;
+      font-size: 28px;
       pointer-events: none;
       z-index: 50;
       opacity: 0;
@@ -126,27 +90,6 @@
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0) scale(1); }
       100% { opacity: 0; transform: translateY(-60px) scale(1.5); }
-    }
-    #explode-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 80px;
-      font-weight: 900;
-      color: #ffcc00;
-      text-shadow: 4px 4px 0 #e83f5c, 8px 8px 0 rgba(0,0,0,0.3);
-      z-index: 250;
-      opacity: 0;
-      pointer-events: none;
-      animation: explodeText 2s ease-out forwards;
-    }
-    @keyframes explodeText {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
-      15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-      30% { transform: translate(-50%, -50%) scale(1); }
-      80% { opacity: 1; }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
     }
     .svg-explode #TESTA {
       animation: headExplode 0.8s ease-out forwards;
@@ -245,21 +188,21 @@
           <path class="cls-5" d="M317.18,797c-3.49-22.76-6.98-45.51-10.48-68.27,16.81-1.24,33.61-2.48,50.42-3.71-.69,2.06-7.77,24.28,4.43,43.86,8.79,14.11,21.97,17.82,25.31,18.64,0,3.16,0,6.32,0,9.48h-49.28c.08-1.53.07-5-1.73-8.62-1.18-2.36-2.66-3.88-3.66-4.74-.51,4.45-1.03,8.91-1.54,13.36-4.49,0-8.98,0-13.47,0Z"/>
           <path class="cls-3" d="M199.07,641.28c5.88-55.65,48.5-98.06,98.56-98.06s92.67,42.4,98.56,98.06v98.06h-197.11v-98.06Z"/>
         </g>
-        <path class="cls-7" d="M62.83,113.1c-5.13,0-9.8-.72-14-2.17-4.2-1.44-7.84-3.51-10.92-6.21-3.08-2.69-5.45-5.98-7.12-9.86-1.67-3.88-2.5-8.26-2.5-13.14v-9.33c0-6.48,1.47-12.08,4.43-16.79,2.95-4.72,7.06-8.32,12.32-10.83,5.26-2.5,11.36-3.75,18.28-3.75,6.35,0,11.92,1,16.7,2.98,4.78,1.99,8.58,4.86,11.4,8.61,2.82,3.75,4.52,8.23,5.1,13.42h-16.94c-.51-2.69-1.48-4.92-2.89-6.69-1.41-1.76-3.24-3.09-5.49-3.99-2.25-.9-4.88-1.35-7.89-1.35-3.66,0-6.82.66-9.48,1.97-2.66,1.32-4.72,3.13-6.16,5.44s-2.17,5-2.17,8.08v15.2c0,3.08.74,5.79,2.21,8.13,1.48,2.34,3.54,4.14,6.21,5.39,2.66,1.25,5.79,1.88,9.38,1.88,3.02,0,5.63-.45,7.84-1.35,2.21-.9,4.03-2.25,5.44-4.04,1.41-1.8,2.41-4.01,2.98-6.64h16.94c-.58,5.2-2.29,9.66-5.15,13.38-2.86,3.72-6.71,6.59-11.55,8.61-4.84,2.02-10.51,3.03-16.98,3.03Z"/>
-        <path class="cls-7" d="M98.53,112.14l24.83-70.15h22.61l24.83,70.15h-16.94l-17.03-49.66-1.92-8.37h-.87l-1.83,8.37-17.03,49.66h-16.65ZM118.55,97.99l4.04-12.22h23.87l3.95,12.22h-31.85Z"/>
-        <path class="cls-7" d="M178.5,112.14V41.98h33.39c3.21,0,6.14.32,8.8.96,2.66.64,5.04,1.6,7.12,2.89,2.08,1.28,3.83,2.86,5.24,4.72,1.41,1.86,2.5,3.99,3.27,6.4s1.16,5.09,1.16,8.04c0,4.94-1.08,9.13-3.22,12.56-2.15,3.43-5.13,6.03-8.95,7.79-3.82,1.77-8.32,2.65-13.52,2.65h-18.19v-12.8h16.55c3.14,0,5.57-.77,7.27-2.31,1.7-1.54,2.55-3.62,2.55-6.25v-2.79c0-2.82-.87-4.97-2.6-6.45-1.73-1.47-4.14-2.21-7.22-2.21h-15.01v56.97h-16.65Z"/>
-        <path class="cls-7" d="M235.09,112.14l24.83-70.15h22.61l24.83,70.15h-16.94l-17.03-49.66-1.92-8.37h-.87l-1.83,8.37-17.03,49.66h-16.65ZM255.1,97.99l4.04-12.22h23.87l3.95,12.22h-31.85Z"/>
-        <path class="cls-7" d="M343.93,113.1c-5.13,0-9.8-.72-14-2.17-4.2-1.44-7.84-3.51-10.92-6.21-3.08-2.69-5.45-5.98-7.12-9.86-1.67-3.88-2.5-8.26-2.5-13.14v-9.33c0-6.48,1.47-12.08,4.43-16.79,2.95-4.72,7.06-8.32,12.32-10.83,5.26-2.5,11.36-3.75,18.28-3.75,6.35,0,11.92,1,16.7,2.98,4.78,1.99,8.58,4.86,11.4,8.61,2.82,3.75,4.52,8.23,5.1,13.42h-16.94c-.51-2.69-1.48-4.92-2.89-6.69-1.41-1.76-3.24-3.09-5.49-3.99-2.25-.9-4.88-1.35-7.89-1.35-3.66,0-6.82.66-9.48,1.97-2.66,1.32-4.72,3.13-6.16,5.44s-2.17,5-2.17,8.08v15.2c0,3.08.74,5.79,2.21,8.13,1.48,2.34,3.54,4.14,6.21,5.39,2.66,1.25,5.79,1.88,9.38,1.88,3.02,0,5.63-.45,7.84-1.35,2.21-.9,4.03-2.25,5.44-4.04,1.41-1.8,2.41-4.01,2.98-6.64h16.94c-.58,5.2-2.29,9.66-5.15,13.38-2.86,3.72-6.71,6.59-11.55,8.61-4.84,2.02-10.51,3.03-16.98,3.03Z"/>
-        <path class="cls-7" d="M383.19,55.17v-13.18h52.45v13.18h-52.45ZM383.19,112.14v-13.18h52.45v13.18h-52.45ZM401.19,100.49v-46.87h16.65v46.87h-16.65Z"/>
-        <path class="cls-7" d="M465.66,112.14v-56.97h-22.61v-13.18h61.69v13.18h-22.42v56.97h-16.65Z"/>
-        <path class="cls-7" d="M499.05,112.14l24.83-70.15h22.61l24.83,70.15h-16.94l-17.03-49.66-1.92-8.37h-.87l-1.83,8.37-17.03,49.66h-16.65ZM527.54,36.11l-9.82-12.61h17.03l7.99,12.61h-15.21ZM519.07,97.99l4.04-12.22h23.87l3.95,12.22h-31.85Z"/>
-        <path class="cls-7" d="M31.02,201.63v-70.15h26.66l12.41,43.3,1.25,5h.87l1.06-5,12.9-43.3h26.18v70.15h-15.78v-55.81h-.77l-1.92,7.7-13.95,48.12h-16.36l-14.15-48.6-1.73-7.22h-.87v55.81h-15.78Z"/>
-        <path class="cls-7" d="M120.04,201.63l24.83-70.15h22.61l24.83,70.15h-16.94l-17.03-49.66-1.92-8.37h-.87l-1.83,8.37-17.03,49.66h-16.65ZM140.05,187.49l4.04-12.22h23.87l3.95,12.22h-31.85Z"/>
-        <path class="cls-7" d="M225.8,202.6c-6.42,0-11.82-.91-16.21-2.74-4.4-1.83-7.78-4.41-10.15-7.75-2.37-3.34-3.72-7.35-4.04-12.03h16.36c.26,2.57.98,4.64,2.17,6.21,1.19,1.57,2.82,2.71,4.91,3.42,2.08.71,4.54,1.06,7.36,1.06,1.92,0,3.64-.16,5.15-.48,1.51-.32,2.79-.8,3.85-1.44,1.06-.64,1.88-1.44,2.45-2.41.58-.96.87-2.12.87-3.46,0-1.67-.37-3.08-1.11-4.23-.74-1.16-1.83-2.12-3.27-2.89-1.44-.77-3.26-1.41-5.44-1.92l-12.41-3.08c-4.17-.96-7.71-2.28-10.63-3.95-2.92-1.67-5.15-3.75-6.69-6.25s-2.31-5.52-2.31-9.05c0-3.27.67-6.21,2.02-8.8,1.35-2.6,3.27-4.81,5.77-6.64s5.52-3.21,9.05-4.14c3.53-.93,7.47-1.39,11.84-1.39,5.97,0,11.05.83,15.25,2.5,4.2,1.67,7.49,4.06,9.86,7.17,2.37,3.11,3.75,6.91,4.14,11.4h-16.26c-.39-2.24-1.14-4.06-2.26-5.44-1.12-1.38-2.58-2.39-4.38-3.03-1.8-.64-3.98-.96-6.54-.96s-4.59.31-6.25.91c-1.67.61-2.92,1.46-3.75,2.55-.83,1.09-1.25,2.34-1.25,3.75s.37,2.74,1.11,3.8c.74,1.06,1.83,1.97,3.27,2.74s3.22,1.44,5.34,2.02l11.16,2.5c4.17,1.03,7.84,2.39,11.02,4.09,3.18,1.7,5.64,3.91,7.41,6.64,1.76,2.73,2.65,6.21,2.65,10.44,0,3.4-.69,6.38-2.07,8.95-1.38,2.57-3.38,4.75-6.01,6.54-2.63,1.8-5.79,3.14-9.48,4.04-3.69.9-7.84,1.35-12.46,1.35Z"/>
-        <path class="cls-7" d="M293.83,202.6c-6.42,0-11.82-.91-16.21-2.74-4.4-1.83-7.78-4.41-10.15-7.75-2.37-3.34-3.72-7.35-4.04-12.03h16.36c.26,2.57.98,4.64,2.17,6.21,1.19,1.57,2.82,2.71,4.91,3.42,2.08.71,4.54,1.06,7.36,1.06,1.92,0,3.64-.16,5.15-.48,1.51-.32,2.79-.8,3.85-1.44,1.06-.64,1.88-1.44,2.45-2.41.58-.96.87-2.12.87-3.46,0-1.67-.37-3.08-1.11-4.23-.74-1.16-1.83-2.12-3.27-2.89-1.44-.77-3.26-1.41-5.44-1.92l-12.41-3.08c-4.17-.96-7.71-2.28-10.63-3.95-2.92-1.67-5.15-3.75-6.69-6.25s-2.31-5.52-2.31-9.05c0-3.27.67-6.21,2.02-8.8,1.35-2.6,3.27-4.81,5.77-6.64s5.52-3.21,9.05-4.14c3.53-.93,7.47-1.39,11.84-1.39,5.97,0,11.05.83,15.25,2.5,4.2,1.67,7.49,4.06,9.86,7.17,2.37,3.11,3.75,6.91,4.14,11.4h-16.26c-.39-2.24-1.14-4.06-2.26-5.44-1.12-1.38-2.58-2.39-4.38-3.03-1.8-.64-3.98-.96-6.54-.96s-4.59.31-6.25.91c-1.67.61-2.92,1.46-3.75,2.55-.83,1.09-1.25,2.34-1.25,3.75s.37,2.74,1.11,3.8c.74,1.06,1.83,1.97,3.27,2.74s3.22,1.44,5.34,2.02l11.16,2.5c4.17,1.03,7.84,2.39,11.02,4.09,3.18,1.7,5.64,3.91,7.41,6.64,1.76,2.73,2.65,6.21,2.65,10.44,0,3.4-.69,6.38-2.07,8.95-1.38,2.57-3.38,4.75-6.01,6.54-2.63,1.8-5.79,3.14-9.48,4.04-3.69.9-7.84,1.35-12.46,1.35Z"/>
-        <path class="cls-7" d="M330.3,144.66v-13.18h52.45v13.18h-52.45ZM330.3,201.63v-13.18h52.45v13.18h-52.45ZM348.3,189.99v-46.87h16.65v46.87h-16.65Z"/>
-        <path class="cls-7" d="M391.79,201.63v-70.15h26.66l12.41,43.3,1.25,5h.87l1.06-5,12.9-43.3h26.18v70.15h-15.78v-55.81h-.77l-1.92,7.7-13.95,48.12h-16.36l-14.15-48.6-1.73-7.22h-.87v55.81h-15.78Z"/>
-        <path class="cls-7" d="M480.81,201.63l24.83-70.15h22.61l24.83,70.15h-16.94l-17.03-49.66-1.92-8.37h-.87l-1.83,8.37-17.03,49.66h-16.65ZM500.82,187.49l4.04-12.22h23.87l3.95,12.22h-31.85Z"/>
+        <g class="draggable-letter"><path class="cls-7" d="M62.83,113.1c-5.13,0-9.8-.72-14-2.17-4.2-1.44-7.84-3.51-10.92-6.21-3.08-2.69-5.45-5.98-7.12-9.86-1.67-3.88-2.5-8.26-2.5-13.14v-9.33c0-6.48,1.47-12.08,4.43-16.79,2.95-4.72,7.06-8.32,12.32-10.83,5.26-2.5,11.36-3.75,18.28-3.75,6.35,0,11.92,1,16.7,2.98,4.78,1.99,8.58,4.86,11.4,8.61,2.82,3.75,4.52,8.23,5.1,13.42h-16.94c-.51-2.69-1.48-4.92-2.89-6.69-1.41-1.76-3.24-3.09-5.49-3.99-2.25-.9-4.88-1.35-7.89-1.35-3.66,0-6.82.66-9.48,1.97-2.66,1.32-4.72,3.13-6.16,5.44s-2.17,5-2.17,8.08v15.2c0,3.08.74,5.79,2.21,8.13,1.48,2.34,3.54,4.14,6.21,5.39,2.66,1.25,5.79,1.88,9.38,1.88,3.02,0,5.63-.45,7.84-1.35,2.21-.9,4.03-2.25,5.44-4.04,1.41-1.8,2.41-4.01,2.98-6.64h16.94c-.58,5.2-2.29,9.66-5.15,13.38-2.86,3.72-6.71,6.59-11.55,8.61-4.84,2.02-10.51,3.03-16.98,3.03Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M98.53,112.14l24.83-70.15h22.61l24.83,70.15h-16.94l-17.03-49.66-1.92-8.37h-.87l-1.83,8.37-17.03,49.66h-16.65ZM118.55,97.99l4.04-12.22h23.87l3.95,12.22h-31.85Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M178.5,112.14V41.98h33.39c3.21,0,6.14.32,8.8.96,2.66.64,5.04,1.6,7.12,2.89,2.08,1.28,3.83,2.86,5.24,4.72,1.41,1.86,2.5,3.99,3.27,6.4s1.16,5.09,1.16,8.04c0,4.94-1.08,9.13-3.22,12.56-2.15,3.43-5.13,6.03-8.95,7.79-3.82,1.77-8.32,2.65-13.52,2.65h-18.19v-12.8h16.55c3.14,0,5.57-.77,7.27-2.31,1.7-1.54,2.55-3.62,2.55-6.25v-2.79c0-2.82-.87-4.97-2.6-6.45-1.73-1.47-4.14-2.21-7.22-2.21h-15.01v56.97h-16.65Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M235.09,112.14l24.83-70.15h22.61l24.83,70.15h-16.94l-17.03-49.66-1.92-8.37h-.87l-1.83,8.37-17.03,49.66h-16.65ZM255.1,97.99l4.04-12.22h23.87l3.95,12.22h-31.85Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M343.93,113.1c-5.13,0-9.8-.72-14-2.17-4.2-1.44-7.84-3.51-10.92-6.21-3.08-2.69-5.45-5.98-7.12-9.86-1.67-3.88-2.5-8.26-2.5-13.14v-9.33c0-6.48,1.47-12.08,4.43-16.79,2.95-4.72,7.06-8.32,12.32-10.83,5.26-2.5,11.36-3.75,18.28-3.75,6.35,0,11.92,1,16.7,2.98,4.78,1.99,8.58,4.86,11.4,8.61,2.82,3.75,4.52,8.23,5.1,13.42h-16.94c-.51-2.69-1.48-4.92-2.89-6.69-1.41-1.76-3.24-3.09-5.49-3.99-2.25-.9-4.88-1.35-7.89-1.35-3.66,0-6.82.66-9.48,1.97-2.66,1.32-4.72,3.13-6.16,5.44s-2.17,5-2.17,8.08v15.2c0,3.08.74,5.79,2.21,8.13,1.48,2.34,3.54,4.14,6.21,5.39,2.66,1.25,5.79,1.88,9.38,1.88,3.02,0,5.63-.45,7.84-1.35,2.21-.9,4.03-2.25,5.44-4.04,1.41-1.8,2.41-4.01,2.98-6.64h16.94c-.58,5.2-2.29,9.66-5.15,13.38-2.86,3.72-6.71,6.59-11.55,8.61-4.84,2.02-10.51,3.03-16.98,3.03Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M383.19,55.17v-13.18h52.45v13.18h-52.45ZM383.19,112.14v-13.18h52.45v13.18h-52.45ZM401.19,100.49v-46.87h16.65v46.87h-16.65Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M465.66,112.14v-56.97h-22.61v-13.18h61.69v13.18h-22.42v56.97h-16.65Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M499.05,112.14l24.83-70.15h22.61l24.83,70.15h-16.94l-17.03-49.66-1.92-8.37h-.87l-1.83,8.37-17.03,49.66h-16.65ZM527.54,36.11l-9.82-12.61h17.03l7.99,12.61h-15.21ZM519.07,97.99l4.04-12.22h23.87l3.95,12.22h-31.85Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M31.02,201.63v-70.15h26.66l12.41,43.3,1.25,5h.87l1.06-5,12.9-43.3h26.18v70.15h-15.78v-55.81h-.77l-1.92,7.7-13.95,48.12h-16.36l-14.15-48.6-1.73-7.22h-.87v55.81h-15.78Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M120.04,201.63l24.83-70.15h22.61l24.83,70.15h-16.94l-17.03-49.66-1.92-8.37h-.87l-1.83,8.37-17.03,49.66h-16.65ZM140.05,187.49l4.04-12.22h23.87l3.95,12.22h-31.85Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M225.8,202.6c-6.42,0-11.82-.91-16.21-2.74-4.4-1.83-7.78-4.41-10.15-7.75-2.37-3.34-3.72-7.35-4.04-12.03h16.36c.26,2.57.98,4.64,2.17,6.21,1.19,1.57,2.82,2.71,4.91,3.42,2.08.71,4.54,1.06,7.36,1.06,1.92,0,3.64-.16,5.15-.48,1.51-.32,2.79-.8,3.85-1.44,1.06-.64,1.88-1.44,2.45-2.41.58-.96.87-2.12.87-3.46,0-1.67-.37-3.08-1.11-4.23-.74-1.16-1.83-2.12-3.27-2.89-1.44-.77-3.26-1.41-5.44-1.92l-12.41-3.08c-4.17-.96-7.71-2.28-10.63-3.95-2.92-1.67-5.15-3.75-6.69-6.25s-2.31-5.52-2.31-9.05c0-3.27.67-6.21,2.02-8.8,1.35-2.6,3.27-4.81,5.77-6.64s5.52-3.21,9.05-4.14c3.53-.93,7.47-1.39,11.84-1.39,5.97,0,11.05.83,15.25,2.5,4.2,1.67,7.49,4.06,9.86,7.17,2.37,3.11,3.75,6.91,4.14,11.4h-16.26c-.39-2.24-1.14-4.06-2.26-5.44-1.12-1.38-2.58-2.39-4.38-3.03-1.8-.64-3.98-.96-6.54-.96s-4.59.31-6.25.91c-1.67.61-2.92,1.46-3.75,2.55-.83,1.09-1.25,2.34-1.25,3.75s.37,2.74,1.11,3.8c.74,1.06,1.83,1.97,3.27,2.74s3.22,1.44,5.34,2.02l11.16,2.5c4.17,1.03,7.84,2.39,11.02,4.09,3.18,1.7,5.64,3.91,7.41,6.64,1.76,2.73,2.65,6.21,2.65,10.44,0,3.4-.69,6.38-2.07,8.95-1.38,2.57-3.38,4.75-6.01,6.54-2.63,1.8-5.79,3.14-9.48,4.04-3.69.9-7.84,1.35-12.46,1.35Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M293.83,202.6c-6.42,0-11.82-.91-16.21-2.74-4.4-1.83-7.78-4.41-10.15-7.75-2.37-3.34-3.72-7.35-4.04-12.03h16.36c.26,2.57.98,4.64,2.17,6.21,1.19,1.57,2.82,2.71,4.91,3.42,2.08.71,4.54,1.06,7.36,1.06,1.92,0,3.64-.16,5.15-.48,1.51-.32,2.79-.8,3.85-1.44,1.06-.64,1.88-1.44,2.45-2.41.58-.96.87-2.12.87-3.46,0-1.67-.37-3.08-1.11-4.23-.74-1.16-1.83-2.12-3.27-2.89-1.44-.77-3.26-1.41-5.44-1.92l-12.41-3.08c-4.17-.96-7.71-2.28-10.63-3.95-2.92-1.67-5.15-3.75-6.69-6.25s-2.31-5.52-2.31-9.05c0-3.27.67-6.21,2.02-8.8,1.35-2.6,3.27-4.81,5.77-6.64s5.52-3.21,9.05-4.14c3.53-.93,7.47-1.39,11.84-1.39,5.97,0,11.05.83,15.25,2.5,4.2,1.67,7.49,4.06,9.86,7.17,2.37,3.11,3.75,6.91,4.14,11.4h-16.26c-.39-2.24-1.14-4.06-2.26-5.44-1.12-1.38-2.58-2.39-4.38-3.03-1.8-.64-3.98-.96-6.54-.96s-4.59.31-6.25.91c-1.67.61-2.92,1.46-3.75,2.55-.83,1.09-1.25,2.34-1.25,3.75s.37,2.74,1.11,3.8c.74,1.06,1.83,1.97,3.27,2.74s3.22,1.44,5.34,2.02l11.16,2.5c4.17,1.03,7.84,2.39,11.02,4.09,3.18,1.7,5.64,3.91,7.41,6.64,1.76,2.73,2.65,6.21,2.65,10.44,0,3.4-.69,6.38-2.07,8.95-1.38,2.57-3.38,4.75-6.01,6.54-2.63,1.8-5.79,3.14-9.48,4.04-3.69.9-7.84,1.35-12.46,1.35Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M330.3,144.66v-13.18h52.45v13.18h-52.45ZM330.3,201.63v-13.18h52.45v13.18h-52.45ZM348.3,189.99v-46.87h16.65v46.87h-16.65Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M391.79,201.63v-70.15h26.66l12.41,43.3,1.25,5h.87l1.06-5,12.9-43.3h26.18v70.15h-15.78v-55.81h-.77l-1.92,7.7-13.95,48.12h-16.36l-14.15-48.6-1.73-7.22h-.87v55.81h-15.78Z"/></g>
+        <g class="draggable-letter"><path class="cls-7" d="M480.81,201.63l24.83-70.15h22.61l24.83,70.15h-16.94l-17.03-49.66-1.92-8.37h-.87l-1.83,8.37-17.03,49.66h-16.65ZM500.82,187.49l4.04-12.22h23.87l3.95,12.22h-31.85Z"/></g>
         <g id="corpo">
           <path class="cls-5" d="M197.16,570.52c0-69.77,27.65-126.86,61.44-126.86h75.9c33.79,0,61.44,57.09,61.44,126.86h-198.78Z"/>
           <ellipse class="cls-2" cx="215.78" cy="625.07" rx="23.98" ry="24.42"/>
@@ -274,7 +217,6 @@
     <div id="eat-feedback">😋</div>
     <div id="shake-overlay"></div>
     <div id="explosion-overlay"></div>
-    <div id="explode-text">💥 BOOM!</div>
     <button id="reset-btn">Ricomincia</button>
   </div>
 
@@ -285,194 +227,70 @@
       const eatFeedback = document.getElementById('eat-feedback');
       const shakeOverlay = document.getElementById('shake-overlay');
       const explosionOverlay = document.getElementById('explosion-overlay');
-      const explodeText = document.getElementById('explode-text');
       const resetBtn = document.getElementById('reset-btn');
       const svgEl = container.querySelector('svg');
 
       const MOUTH_X = 297;
       const MOUTH_Y = 400;
       const EAT_DIST = 70;
-      const EAT_DIST_SQ = EAT_DIST * EAT_DIST;
 
-      const LETTERS = ['P', 'O', 'S', 'T', 'E', 'R', 'M', 'A', 'N', 'G', 'I', 'A', 'C', 'I', 'B', 'O'];
-      const LETTER_COLORS = ['#e83f5c', '#ef80b1', '#753e90', '#f3a3b4', '#b83e18', '#ff6b35', '#d63384', '#7b2d8e'];
       const EXPLOSION_TRIGGERS = [1, 3, 5, 7, 11, 13];
 
       let eatenCount = 0;
       let explosionTarget = pickExplosionTarget();
       let isExploded = false;
       let isEating = false;
+      const originalTransforms = new Map();
 
       function pickExplosionTarget() {
         return EXPLOSION_TRIGGERS[Math.floor(Math.random() * EXPLOSION_TRIGGERS.length)];
       }
 
-      function getLetterPositions(count) {
-        const positions = [];
-        const margin = 50;
-        const minY = 220;
-        const maxY = 760;
-        const minX = 30;
-        const maxX = 566;
-
-        for (let i = 0; i < count; i++) {
-          let x, y, attempts = 0;
-          do {
-            x = minX + Math.random() * (maxX - minX);
-            y = minY + Math.random() * (maxY - minY);
-            attempts++;
-          } while (attempts < 50 && positions.some(p => Math.hypot(p.x - x, p.y - y) < 60));
-          positions.push({ x, y });
-        }
-        return positions;
-      }
-
-      function createLetters() {
-        const positions = getLetterPositions(LETTERS.length);
-        LETTERS.forEach((char, i) => {
-          const el = document.createElement('div');
-          el.className = 'letter';
-          el.textContent = char;
-          el.style.left = positions[i].x + 'px';
-          el.style.top = positions[i].y + 'px';
-          el.style.color = LETTER_COLORS[i % LETTER_COLORS.length];
-          el.dataset.eaten = 'false';
-          container.appendChild(el);
-        });
-      }
-
-      function getMouthPos() {
-        const rect = container.getBoundingClientRect();
-        const scaleX = rect.width / 596.28;
-        const scaleY = rect.height / 842.39;
+      function toSvgCoords(clientX, clientY) {
+        const rect = svgEl.getBoundingClientRect();
+        const viewBox = svgEl.viewBox.baseVal;
         return {
-          x: rect.left + MOUTH_X * scaleX,
-          y: rect.top + MOUTH_Y * scaleY
+          x: (clientX - rect.left) * (viewBox.width / rect.width),
+          y: (clientY - rect.top) * (viewBox.height / rect.height)
         };
       }
 
-      function getLetterCenter(el) {
-        const rect = el.getBoundingClientRect();
-        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-      }
-
-      function checkEat(el) {
-        if (isExploded || isEating || el.dataset.eaten === 'true') return;
-        const mouth = getMouthPos();
-        const lc = getLetterCenter(el);
-        const dx = lc.x - mouth.x;
-        const dy = lc.y - mouth.y;
-        const distSq = dx * dx + dy * dy;
-
-        if (distSq < EAT_DIST_SQ) {
-          eatLetter(el);
-        }
-      }
-
-      function eatLetter(el) {
-        if (isEating) return;
-        isEating = true;
-        el.dataset.eaten = 'true';
-        el.classList.remove('dragging');
-        el.classList.add('eaten');
-
-        eatenCount++;
-        counter.textContent = '✧ ' + eatenCount;
-
-        const rect = el.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        eatFeedback.style.left = (rect.left - containerRect.left + rect.width / 2 - 12) + 'px';
-        eatFeedback.style.top = (rect.top - containerRect.top - 10) + 'px';
-        eatFeedback.className = 'active';
-        setTimeout(() => { eatFeedback.className = ''; }, 700);
-
-        setTimeout(() => {
-          isEating = false;
-          if (eatenCount >= explosionTarget) {
-            triggerExplosion();
-          }
-        }, 400);
-      }
-
-      function triggerExplosion() {
-        isExploded = true;
-        shakeOverlay.className = 'active';
-        setTimeout(() => { shakeOverlay.className = ''; }, 500);
-
-        const rect = container.getBoundingClientRect();
-        for (let i = 0; i < 40; i++) {
-          const p = document.createElement('div');
-          p.className = 'particle';
-          const size = 6 + Math.random() * 14;
-          p.style.width = size + 'px';
-          p.style.height = size + 'px';
-          p.style.left = (100 + Math.random() * 400) + 'px';
-          p.style.top = (250 + Math.random() * 400) + 'px';
-          const colors = ['#e83f5c', '#ef80b1', '#753e90', '#ffcc00', '#f3a3b4', '#ff6b35', '#d63384', '#ff4444'];
-          p.style.background = colors[Math.floor(Math.random() * colors.length)];
-          const angle = Math.random() * Math.PI * 2;
-          const dist = 80 + Math.random() * 250;
-          p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-          p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-          p.style.animationDelay = (Math.random() * 0.3) + 's';
-          explosionOverlay.appendChild(p);
-        }
-
-        const debrisChars = ['!', '?', '#', '@', '&', '%', '$', 'P', 'O', 'W'];
-        for (let i = 0; i < 12; i++) {
-          const d = document.createElement('div');
-          d.className = 'debris';
-          d.textContent = debrisChars[Math.floor(Math.random() * debrisChars.length)];
-          d.style.left = (180 + Math.random() * 240) + 'px';
-          d.style.top = (300 + Math.random() * 200) + 'px';
-          const angle = Math.random() * Math.PI * 2;
-          const dist = 100 + Math.random() * 300;
-          d.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-          d.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-          d.style.setProperty('--r', (Math.random() * 720 - 360) + 'deg');
-          d.style.animationDelay = (Math.random() * 0.2) + 's';
-          explosionOverlay.appendChild(d);
-        }
-
-        svgEl.classList.add('svg-explode');
-
-        explodeText.style.display = 'block';
-        setTimeout(() => { resetBtn.style.display = 'block'; }, 1500);
-      }
-
-      function resetGame() {
-        isExploded = false;
-        isEating = false;
-        eatenCount = 0;
-        explosionTarget = pickExplosionTarget();
-        counter.textContent = '✧ 0';
-        resetBtn.style.display = 'none';
-        explodeText.style.display = 'none';
-        svgEl.classList.remove('svg-explode');
-        explosionOverlay.innerHTML = '';
-        shakeOverlay.className = '';
-
-        document.querySelectorAll('.letter').forEach(el => el.remove());
-
-        createLetters();
-        initDrag();
+      function getGroupCenter(g) {
+        const bbox = g.getBBox();
+        return { x: bbox.x + bbox.width / 2, y: bbox.y + bbox.height / 2 };
       }
 
       function initDrag() {
-        const letters = document.querySelectorAll('.letter');
+        const groups = svgEl.querySelectorAll('.draggable-letter');
+        groups.forEach(g => {
+          originalTransforms.set(g, g.getAttribute('transform') || '');
+        });
+
         let dragEl = null;
-        let dragOffsetX = 0;
-        let dragOffsetY = 0;
+        let startPointer = null;
+        let startTranslate = null;
+
+        function findGroup(el) {
+          while (el && el !== svgEl) {
+            if (el.classList && el.classList.contains('draggable-letter')) return el;
+            el = el.parentElement;
+          }
+          return null;
+        }
 
         function onPointerDown(e) {
           if (isExploded) return;
-          const letter = e.currentTarget;
-          if (letter.dataset.eaten === 'true') return;
-          const rect = letter.getBoundingClientRect();
-          dragEl = letter;
-          dragOffsetX = e.clientX - rect.left;
-          dragOffsetY = e.clientY - rect.top;
+          const g = findGroup(e.target);
+          if (!g || g.dataset.eaten === 'true') return;
+          const svgPt = toSvgCoords(e.clientX, e.clientY);
+          dragEl = g;
           dragEl.classList.add('dragging');
+          startPointer = svgPt;
+
+          const tr = g.getAttribute('transform');
+          const match = tr && tr.match(/translate\(([-\d.]+),\s*([-\d.]+)\)/);
+          startTranslate = match ? { x: parseFloat(match[1]), y: parseFloat(match[2]) } : { x: 0, y: 0 };
+
           document.addEventListener('pointermove', onPointerMove);
           document.addEventListener('pointerup', onPointerUp);
           document.addEventListener('pointercancel', onPointerUp);
@@ -480,17 +298,12 @@
 
         function onPointerMove(e) {
           if (!dragEl) return;
-          const clientX = e.clientX;
-          const clientY = e.clientY;
-          const containerRect = container.getBoundingClientRect();
-          const scaleX = 596.28 / containerRect.width;
-          const scaleY = 842.39 / containerRect.height;
-          let x = (clientX - containerRect.left - dragOffsetX) * scaleX;
-          let y = (clientY - containerRect.top - dragOffsetY) * scaleY;
-          x = Math.max(0, Math.min(596.28 - 40, x));
-          y = Math.max(0, Math.min(842.39 - 50, y));
-          dragEl.style.left = x + 'px';
-          dragEl.style.top = y + 'px';
+          const svgPt = toSvgCoords(e.clientX, e.clientY);
+          const dx = svgPt.x - startPointer.x;
+          const dy = svgPt.y - startPointer.y;
+          const nx = startTranslate.x + dx;
+          const ny = startTranslate.y + dy;
+          dragEl.setAttribute('transform', `translate(${nx}, ${ny})`);
           checkEat(dragEl);
         }
 
@@ -504,12 +317,123 @@
           document.removeEventListener('pointercancel', onPointerUp);
         }
 
-        letters.forEach(el => {
-          el.addEventListener('pointerdown', onPointerDown);
+        svgEl.addEventListener('pointerdown', onPointerDown);
+      }
+
+      function checkEat(g) {
+        if (isExploded || isEating || g.dataset.eaten === 'true') return;
+        const center = getGroupCenter(g);
+
+        const tr = g.getAttribute('transform');
+        const match = tr && tr.match(/translate\(([-\d.]+),\s*([-\d.]+)\)/);
+        const offset = match ? { x: parseFloat(match[1]), y: parseFloat(match[2]) } : { x: 0, y: 0 };
+
+        const cx = center.x + offset.x;
+        const cy = center.y + offset.y;
+        const dx = cx - MOUTH_X;
+        const dy = cy - MOUTH_Y;
+
+        if (dx * dx + dy * dy < EAT_DIST * EAT_DIST) {
+          eatLetter(g);
+        }
+      }
+
+      function eatLetter(g) {
+        if (isEating) return;
+        isEating = true;
+        g.dataset.eaten = 'true';
+
+        eatenCount++;
+        counter.textContent = '✧ ' + eatenCount;
+
+        const bbox = g.getBBox();
+        const tr = g.getAttribute('transform');
+        const match = tr && tr.match(/translate\(([-\d.]+),\s*([-\d.]+)\)/);
+        const offset = match ? { x: parseFloat(match[1]), y: parseFloat(match[2]) } : { x: 0, y: 0 };
+        const cx = (bbox.x + bbox.width / 2 + offset.x);
+        const cy = (bbox.y + bbox.height / 2 + offset.y);
+
+        const mouthSvg = { x: MOUTH_X, y: MOUTH_Y };
+        const angle = Math.atan2(cy - mouthSvg.y, cx - mouthSvg.x) + Math.PI;
+
+        g.setAttribute('transform', '');
+        g.style.transition = 'transform 0.35s ease-in, opacity 0.35s ease-in';
+        g.style.transformOrigin = `${bbox.x + bbox.width / 2}px ${bbox.y + bbox.height / 2}px`;
+        g.style.transform = `translate(${offset.x}px, ${offset.y}px) translate(${Math.cos(angle) * 20}px, ${Math.sin(angle) * 20}px) scale(0)`;
+        g.style.opacity = '0';
+        g.style.pointerEvents = 'none';
+
+        const containerRect = container.getBoundingClientRect();
+        const svgRect = svgEl.getBoundingClientRect();
+        const scaleX = svgRect.width / 596.28;
+        const scaleY = svgRect.height / 842.39;
+        const fbX = svgRect.left - containerRect.left + cx * scaleX;
+        const fbY = svgRect.top - containerRect.top + (cy - 30) * scaleY;
+        eatFeedback.style.left = fbX + 'px';
+        eatFeedback.style.top = fbY + 'px';
+        eatFeedback.className = 'active';
+        setTimeout(() => { eatFeedback.className = ''; }, 700);
+
+        setTimeout(() => {
+          isEating = false;
+          if (eatenCount >= explosionTarget) {
+            triggerExplosion();
+          }
+        }, 350);
+      }
+
+      function triggerExplosion() {
+        isExploded = true;
+        shakeOverlay.className = 'active';
+        setTimeout(() => { shakeOverlay.className = ''; }, 500);
+
+        for (let i = 0; i < 50; i++) {
+          const p = document.createElement('div');
+          p.className = 'particle';
+          const size = 5 + Math.random() * 16;
+          p.style.width = size + 'px';
+          p.style.height = size + 'px';
+          p.style.left = (80 + Math.random() * 440) + 'px';
+          p.style.top = (200 + Math.random() * 450) + 'px';
+          const colors = ['#e83f5c', '#ef80b1', '#753e90', '#ffcc00', '#f3a3b4', '#ff6b35', '#d63384', '#ff4444'];
+          p.style.background = colors[Math.floor(Math.random() * colors.length)];
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 60 + Math.random() * 280;
+          p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+          p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+          p.style.animationDelay = (Math.random() * 0.4) + 's';
+          explosionOverlay.appendChild(p);
+        }
+
+        svgEl.classList.add('svg-explode');
+
+        setTimeout(() => { resetBtn.style.display = 'block'; }, 1500);
+      }
+
+      function resetGame() {
+        isExploded = false;
+        isEating = false;
+        eatenCount = 0;
+        explosionTarget = pickExplosionTarget();
+        counter.textContent = '✧ 0';
+        resetBtn.style.display = 'none';
+        svgEl.classList.remove('svg-explode');
+        explosionOverlay.innerHTML = '';
+        shakeOverlay.className = '';
+
+        svgEl.querySelectorAll('.draggable-letter').forEach(g => {
+          g.dataset.eaten = 'false';
+          g.style.transition = '';
+          g.style.opacity = '';
+          g.style.transform = '';
+          g.style.transformOrigin = '';
+          g.style.pointerEvents = '';
+          const orig = originalTransforms.get(g);
+          g.setAttribute('transform', orig || '');
+          void g.offsetWidth;
         });
       }
 
-      createLetters();
       initDrag();
       resetBtn.addEventListener('click', resetGame);
     })();
