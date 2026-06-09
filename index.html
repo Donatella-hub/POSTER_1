@@ -268,7 +268,7 @@
             <path class="cls-8" d="M275.26,382.64c.72,9.06,6.82,17.22,15.54,20.03s17.53-.18,23.31-6.62c3.47-3.86,5.51-8.79,5.88-13.96.03-.37-.38-.45-.66-.45-14.42.1-28.85.19-43.27.29-.81,0-1.13,1.02-.14,1.02,14.42-.1,28.85-.19,43.27-.29l-.66-.45c-.6,8.44-5.93,16.13-13.92,19.17s-17.01.34-22.53-6.07c-3.16-3.67-4.99-8.25-5.37-13.07-.05-.63-1.5-.29-1.45.39Z"/>
           </g>
           <g id="sorriso">
-            <path d="M270,395 Q296,407 322,395" fill="none" stroke="#b83e18" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M285,396 Q296,405 307,396" fill="none" stroke="#b83e18" stroke-width="3.5" stroke-linecap="round"/>
           </g>
           <path class="cls-3" d="M366.91,319.08c.79,14.18-7.87,31.69-26.15,35.85-15.13,3.45-31.82-3.41-40.11-17.11-9.17,12.75-25.49,19.25-41.13,16.48-17.47-3.1-31.86-17.37-31.87-34.41-.01-15.48,11.83-28.27,26.34-33.08,15.21-5.05,32.52-1.05,43.7,10.19,1.85-1.82,14.08-13.52,31.99-12.52,19.19,1.08,36.21,16.24,37.24,34.61Z"/>
           <ellipse class="cls-4" cx="285.41" cy="365.29" rx="8.75" ry="6.23"/>
@@ -765,27 +765,24 @@
 
       initDrag();
 
-      const eyeCenters = [
-        { cx: 285.41, cy: 365.29, el: pupils[0] },
-        { cx: 309.83, cy: 365.29, el: pupils[1] }
-      ];
+      const eyeMidX = 297.62;
       svgEl.addEventListener('mousemove', (e) => {
         if (isExploded) return;
         const pt = toSvgCoords(e.clientX, e.clientY);
-        for (const eye of eyeCenters) {
-          if (!eye.el) continue;
-          const dx = pt.x - eye.cx;
-          const dy = pt.y - eye.cy;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 0.1) continue;
-          const nx = Math.min(maxDx, Math.abs(dx)) * Math.sign(dx);
-          const ny = Math.min(maxDy, Math.abs(dy)) * Math.sign(dy);
-          eye.el.setAttribute('transform', `translate(${nx}, ${ny})`);
+        const dx = pt.x - eyeMidX;
+        const dy = pt.y - 365.29;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 0.1) return;
+        const nx = Math.min(maxDx, Math.abs(dx)) * Math.sign(dx);
+        const ny = Math.min(maxDy, Math.abs(dy)) * Math.sign(dy);
+        const tr = `translate(${nx}, ${ny})`;
+        for (let i = 0; i < 2; i++) {
+          if (pupils[i]) pupils[i].setAttribute('transform', tr);
         }
       });
       svgEl.addEventListener('mouseleave', () => {
-        for (const eye of eyeCenters) {
-          if (eye.el) eye.el.setAttribute('transform', '');
+        for (let i = 0; i < 2; i++) {
+          if (pupils[i]) pupils[i].setAttribute('transform', '');
         }
       });
 
