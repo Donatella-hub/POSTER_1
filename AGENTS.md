@@ -33,7 +33,7 @@ Poster interattivo HTML/SVG con un personaggio che "mangia" le lettere viola tra
 ### Esplosione
 - Il numero di lettere prima dell'esplosione è random da `[1, 3, 5, 7, 11, 13]`
 - Include: flash bianco, onda d'urto, 80 particelle, 120 scintille, 15 nuvole di fumo, 20 detriti testuali, 15 frammenti irregolari
-- Le parti SVG del personaggio (testa, corpo, gambe) si sbriciolano in 350 frammenti colorati che volano via con rotazione e scala decrescente
+- Le parti SVG del personaggio (testa, corpo, gambe) si scompongono in 1200 particelle geometriche (cerchi, quadrati, triangoli, diamanti) su canvas full-page con gravità e rotazione
 - Dopo 1.5s appare il pulsante "Ricomincia"
 - Il reset ripristina: posizione lettere, fullness, overlay esplosione
 

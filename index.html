@@ -93,14 +93,7 @@
       0% { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
       100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(0.2); }
     }
-    .shard {
-      position: absolute;
-      animation: shardFly 1.2s cubic-bezier(.15,.75,.3,1) forwards;
-    }
-    @keyframes shardFly {
-      0% { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
-      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(var(--es, 0.1)); }
-    }
+
     #flash-overlay {
       position: absolute;
       inset: 0;
@@ -139,6 +132,13 @@
       0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); border-width: 6px; }
       100% { opacity: 0; transform: translate(-50%, -50%) scale(35); border-width: 1px; }
     }
+    #explosion-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      display: none;
+    }
     #shake-overlay {
       position: absolute;
       inset: 0;
@@ -165,8 +165,7 @@
     }
     .svg-explode #TESTA,
     .svg-explode #corpo,
-    .svg-explode #gambe,
-    .svg-explode #SFONDO {
+    .svg-explode #gambe {
       opacity: 0;
       pointer-events: none;
     }
@@ -269,7 +268,7 @@
             <path class="cls-8" d="M275.26,382.64c.72,9.06,6.82,17.22,15.54,20.03s17.53-.18,23.31-6.62c3.47-3.86,5.51-8.79,5.88-13.96.03-.37-.38-.45-.66-.45-14.42.1-28.85.19-43.27.29-.81,0-1.13,1.02-.14,1.02,14.42-.1,28.85-.19,43.27-.29l-.66-.45c-.6,8.44-5.93,16.13-13.92,19.17s-17.01.34-22.53-6.07c-3.16-3.67-4.99-8.25-5.37-13.07-.05-.63-1.5-.29-1.45.39Z"/>
           </g>
           <g id="sorriso">
-            <path d="M274,393 Q286,404 299,393" fill="none" stroke="#b83e18" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M270,395 Q296,407 322,395" fill="none" stroke="#b83e18" stroke-width="3.5" stroke-linecap="round"/>
           </g>
           <path class="cls-3" d="M366.91,319.08c.79,14.18-7.87,31.69-26.15,35.85-15.13,3.45-31.82-3.41-40.11-17.11-9.17,12.75-25.49,19.25-41.13,16.48-17.47-3.1-31.86-17.37-31.87-34.41-.01-15.48,11.83-28.27,26.34-33.08,15.21-5.05,32.52-1.05,43.7,10.19,1.85-1.82,14.08-13.52,31.99-12.52,19.19,1.08,36.21,16.24,37.24,34.61Z"/>
           <ellipse class="cls-4" cx="285.41" cy="365.29" rx="8.75" ry="6.23"/>
@@ -315,6 +314,7 @@
     <div id="shockwave"></div>
     <button id="reset-btn">Ricomincia</button>
   </div>
+  <canvas id="explosion-canvas"></canvas>
 
   <script>
     (function() {
@@ -625,42 +625,107 @@
         setTimeout(() => { resetBtn.style.display = 'block'; }, 1500);
       }
 
+      function getViewportCenter() {
+        const r = svgEl.getBoundingClientRect();
+        const sx = r.width / 596.28;
+        const sy = r.height / 842.39;
+        return { x: r.left + 296 * sx, y: r.top + 530 * sy };
+      }
+
       function shatterCharacter() {
-        const charColors = ['#e83f5c', '#ef80b1', '#f3a3b4', '#753e90', '#f9d0dd', '#b83e18', '#d63384'];
-        const rects = [];
-        for (const id of ['TESTA', 'corpo', 'gambe']) {
-          const el = svgEl.querySelector('#' + id);
-          if (!el) continue;
-          try {
-            const b = el.getBBox();
-            rects.push(b);
-          } catch(e) {}
-        }
-        if (rects.length === 0) {
-          rects.push({ x: 197, y: 310, width: 210, height: 490 });
-        }
-        for (let i = 0; i < 350; i++) {
-          const r = rects[Math.floor(Math.random() * rects.length)];
-          const bx = r.x + Math.random() * r.width;
-          const by = r.y + Math.random() * r.height;
-          const p = document.createElement('div');
-          p.className = 'shard';
-          const sz = 3 + Math.random() * 14;
-          p.style.width = sz + 'px';
-          p.style.height = sz + 'px';
-          p.style.left = bx + 'px';
-          p.style.top = by + 'px';
-          p.style.background = charColors[Math.floor(Math.random() * charColors.length)];
-          p.style.borderRadius = (Math.random() * 4) + 'px';
+        const canvas = document.getElementById('explosion-canvas');
+        const ctx = canvas.getContext('2d');
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+        canvas.width = W;
+        canvas.height = H;
+        canvas.style.display = 'block';
+
+        const colors = ['#e83f5c', '#ef80b1', '#f3a3b4', '#753e90', '#f9d0dd', '#b83e18', '#d63384', '#ff6b35', '#ffcc00'];
+        const shapes = ['circle', 'square', 'triangle', 'diamond'];
+
+        const center = getViewportCenter();
+        const particles = [];
+        const numParticles = 1200;
+
+        function rand(min, max) { return min + Math.random() * (max - min); }
+
+        for (let i = 0; i < numParticles; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const dist = 20 + Math.random() * 300;
-          p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-          p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-          p.style.setProperty('--r', (Math.random() * 1080 - 540) + 'deg');
-          p.style.setProperty('--es', (0.05 + Math.random() * 0.3).toFixed(2));
-          p.style.animationDelay = (Math.random() * 0.3) + 's';
-          explosionOverlay.appendChild(p);
+          const speed = rand(2, 18);
+          const spread = rand(-30, 30);
+          particles.push({
+            x: center.x + rand(-60, 60),
+            y: center.y + rand(-60, 60),
+            vx: Math.cos(angle) * speed + rand(-0.5, 0.5),
+            vy: Math.sin(angle) * speed + rand(-2, 1),
+            size: rand(1.5, 7),
+            opacity: rand(0.5, 1),
+            fade: rand(0.003, 0.02),
+            shape: shapes[Math.floor(Math.random() * shapes.length)],
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rotation: rand(0, Math.PI * 2),
+            rotSpeed: rand(-0.15, 0.15),
+            gravity: rand(0.02, 0.08)
+          });
         }
+
+        let frame = 0;
+        const maxFrames = 350;
+
+        function animate() {
+          if (frame > maxFrames) {
+            canvas.style.display = 'none';
+            return;
+          }
+          ctx.clearRect(0, 0, W, H);
+          for (const p of particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity;
+            p.vx *= 0.99;
+            p.opacity -= p.fade;
+            p.rotation += p.rotSpeed;
+            if (p.opacity <= 0) continue;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.globalAlpha = p.opacity;
+            ctx.fillStyle = p.color;
+            const s = p.size;
+            switch (p.shape) {
+              case 'circle':
+                ctx.beginPath();
+                ctx.arc(0, 0, s, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+              case 'square':
+                ctx.fillRect(-s, -s, s * 2, s * 2);
+                break;
+              case 'triangle':
+                ctx.beginPath();
+                ctx.moveTo(0, -s * 1.3);
+                ctx.lineTo(-s, s);
+                ctx.lineTo(s, s);
+                ctx.closePath();
+                ctx.fill();
+                break;
+              case 'diamond':
+                ctx.beginPath();
+                ctx.moveTo(0, -s);
+                ctx.lineTo(s, 0);
+                ctx.lineTo(0, s);
+                ctx.lineTo(-s, 0);
+                ctx.closePath();
+                ctx.fill();
+                break;
+            }
+            ctx.restore();
+          }
+          frame++;
+          requestAnimationFrame(animate);
+        }
+        animate();
       }
 
       function resetGame() {
@@ -674,6 +739,7 @@
         resetBtn.style.display = 'none';
         svgEl.classList.remove('svg-explode');
         explosionOverlay.innerHTML = '';
+        document.getElementById('explosion-canvas').style.display = 'none';
         shakeOverlay.className = '';
         flashOverlay.className = '';
         shockwave.className = '';
