@@ -48,11 +48,88 @@
     .particle {
       position: absolute;
       border-radius: 50%;
-      animation: particleFly 1.2s ease-out forwards;
+      animation: particleFly 1s ease-out forwards;
     }
     @keyframes particleFly {
       0% { opacity: 1; transform: translate(0,0) scale(1); }
-      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.3); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(var(--es, 0)); }
+    }
+    .spark {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      animation: sparkFly 0.6s ease-out forwards;
+    }
+    @keyframes sparkFly {
+      0% { opacity: 1; transform: translate(0,0); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)); }
+    }
+    .smoke {
+      position: absolute;
+      border-radius: 50%;
+      animation: smokeRise 1.8s ease-out forwards;
+    }
+    @keyframes smokeRise {
+      0% { opacity: 0.6; transform: translate(0,0) scale(0.5); }
+      30% { opacity: 0.5; }
+      100% { opacity: 0; transform: translate(var(--tx), calc(var(--ty) - 80px)) scale(3); }
+    }
+    .debris {
+      position: absolute;
+      font-size: 28px;
+      font-weight: 900;
+      animation: debrisFly 1.2s ease-out forwards;
+    }
+    @keyframes debrisFly {
+      0% { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(0.1); }
+    }
+    .chunk {
+      position: absolute;
+      animation: chunkFly 0.9s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    @keyframes chunkFly {
+      0% { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--r)) scale(0.2); }
+    }
+    #flash-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 190;
+      pointer-events: none;
+      background: #fff;
+      opacity: 0;
+      display: none;
+    }
+    #flash-overlay.active {
+      display: block;
+      animation: flashBang 0.3s ease-out forwards;
+    }
+    @keyframes flashBang {
+      0% { opacity: 0.9; }
+      100% { opacity: 0; }
+    }
+    #shockwave {
+      position: absolute;
+      left: 50%;
+      top: 55%;
+      width: 20px;
+      height: 20px;
+      border: 4px solid #ffcc00;
+      border-radius: 50%;
+      z-index: 195;
+      pointer-events: none;
+      opacity: 0;
+      display: none;
+    }
+    #shockwave.active {
+      display: block;
+      animation: shockwaveExpand 0.7s ease-out forwards;
+    }
+    @keyframes shockwaveExpand {
+      0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); border-width: 6px; }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(35); border-width: 1px; }
     }
     #shake-overlay {
       position: absolute;
@@ -63,19 +140,44 @@
     }
     #shake-overlay.active {
       display: block;
-      animation: shake 0.5s ease-in-out;
+      animation: shake 0.6s ease-in-out;
     }
     @keyframes shake {
       0%, 100% { transform: translate(0,0); }
-      10% { transform: translate(-8px, 6px); }
-      20% { transform: translate(8px, -4px); }
-      30% { transform: translate(-6px, 8px); }
-      40% { transform: translate(6px, -6px); }
-      50% { transform: translate(-4px, 4px); }
-      60% { transform: translate(4px, -2px); }
-      70% { transform: translate(-2px, 6px); }
-      80% { transform: translate(2px, -4px); }
-      90% { transform: translate(-6px, 2px); }
+      5% { transform: translate(-12px, 8px); }
+      15% { transform: translate(10px, -6px); }
+      25% { transform: translate(-8px, 10px); }
+      35% { transform: translate(14px, -8px); }
+      45% { transform: translate(-6px, 6px); }
+      55% { transform: translate(8px, -10px); }
+      65% { transform: translate(-10px, 4px); }
+      75% { transform: translate(6px, -6px); }
+      85% { transform: translate(-4px, 8px); }
+      95% { transform: translate(8px, -4px); }
+    }
+    .svg-explode #TESTA {
+      animation: headExplode 0.6s ease-out forwards;
+      transform-origin: 296px 373px;
+    }
+    .svg-explode #corpo {
+      animation: bodyExplode 0.6s ease-out forwards;
+      transform-origin: 296px 500px;
+    }
+    .svg-explode #gambe {
+      animation: legsExplode 0.6s ease-out forwards;
+      transform-origin: 296px 700px;
+    }
+    @keyframes headExplode {
+      0% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+      100% { transform: translate(80px, -140px) rotate(45deg); opacity: 0; }
+    }
+    @keyframes bodyExplode {
+      0% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+      100% { transform: translate(-100px, 100px) rotate(-35deg); opacity: 0; }
+    }
+    @keyframes legsExplode {
+      0% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+      100% { transform: translate(60px, 160px) rotate(55deg); opacity: 0; }
     }
     #corpo {
       transition: transform 0.3s ease-out;
@@ -230,6 +332,8 @@
     <div id="eat-feedback">😋</div>
     <div id="shake-overlay"></div>
     <div id="explosion-overlay"></div>
+    <div id="flash-overlay"></div>
+    <div id="shockwave"></div>
     <button id="reset-btn">Ricomincia</button>
   </div>
 
@@ -240,6 +344,8 @@
       const eatFeedback = document.getElementById('eat-feedback');
       const shakeOverlay = document.getElementById('shake-overlay');
       const explosionOverlay = document.getElementById('explosion-overlay');
+      const flashOverlay = document.getElementById('flash-overlay');
+      const shockwave = document.getElementById('shockwave');
       const resetBtn = document.getElementById('reset-btn');
       const svgEl = container.querySelector('svg');
 
@@ -412,25 +518,108 @@
 
       function triggerExplosion() {
         isExploded = true;
-        shakeOverlay.className = 'active';
-        setTimeout(() => { shakeOverlay.className = ''; }, 500);
 
-        for (let i = 0; i < 50; i++) {
+        shakeOverlay.className = 'active';
+        setTimeout(() => { shakeOverlay.className = ''; }, 600);
+
+        flashOverlay.className = 'active';
+        setTimeout(() => { flashOverlay.className = ''; }, 300);
+
+        shockwave.className = 'active';
+        setTimeout(() => { shockwave.className = ''; }, 700);
+
+        const cx = 296, cy = 530;
+        const colors = ['#e83f5c', '#ef80b1', '#753e90', '#ffcc00', '#f3a3b4', '#ff6b35', '#d63384', '#ff4444', '#ff6600', '#ff3300'];
+
+        for (let i = 0; i < 80; i++) {
           const p = document.createElement('div');
           p.className = 'particle';
-          const size = 5 + Math.random() * 16;
+          const size = 4 + Math.random() * 20;
           p.style.width = size + 'px';
           p.style.height = size + 'px';
-          p.style.left = (80 + Math.random() * 440) + 'px';
-          p.style.top = (200 + Math.random() * 450) + 'px';
-          const colors = ['#e83f5c', '#ef80b1', '#753e90', '#ffcc00', '#f3a3b4', '#ff6b35', '#d63384', '#ff4444'];
+          p.style.left = (cx - 30 + Math.random() * 60) + 'px';
+          p.style.top = (cy - 30 + Math.random() * 60) + 'px';
           p.style.background = colors[Math.floor(Math.random() * colors.length)];
+          p.style.borderRadius = Math.random() > 0.5 ? '50%' : '3px';
           const angle = Math.random() * Math.PI * 2;
-          const dist = 60 + Math.random() * 280;
+          const dist = 40 + Math.random() * 350;
           p.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
           p.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-          p.style.animationDelay = (Math.random() * 0.4) + 's';
+          p.style.setProperty('--es', (0.1 + Math.random() * 0.4).toFixed(2));
+          p.style.animationDelay = (Math.random() * 0.25) + 's';
           explosionOverlay.appendChild(p);
+        }
+
+        for (let i = 0; i < 120; i++) {
+          const s = document.createElement('div');
+          s.className = 'spark';
+          const sparkColors = ['#fff', '#ffcc00', '#ff8800', '#ff4444', '#ffff88'];
+          s.style.background = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+          s.style.left = (cx - 10 + Math.random() * 20) + 'px';
+          s.style.top = (cy - 10 + Math.random() * 20) + 'px';
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 30 + Math.random() * 400;
+          s.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+          s.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+          s.style.animationDelay = (Math.random() * 0.15) + 's';
+          explosionOverlay.appendChild(s);
+        }
+
+        for (let i = 0; i < 15; i++) {
+          const sm = document.createElement('div');
+          sm.className = 'smoke';
+          const sz = 20 + Math.random() * 40;
+          sm.style.width = sz + 'px';
+          sm.style.height = sz + 'px';
+          sm.style.left = (cx - 40 + Math.random() * 80) + 'px';
+          sm.style.top = (cy - 40 + Math.random() * 80) + 'px';
+          sm.style.background = `rgba(150, 150, 150, ${0.2 + Math.random() * 0.3})`;
+          const angle = (Math.random() - 0.5) * Math.PI * 0.6;
+          const dist = 30 + Math.random() * 100;
+          sm.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+          sm.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+          sm.style.animationDelay = (Math.random() * 0.3) + 's';
+          explosionOverlay.appendChild(sm);
+        }
+
+        const debrisChars = ['!', '?', '#', '@', '&', '%', '$', '⚡', '★', '♦', '🔥', '💥'];
+        for (let i = 0; i < 20; i++) {
+          const d = document.createElement('div');
+          d.className = 'debris';
+          d.textContent = debrisChars[Math.floor(Math.random() * debrisChars.length)];
+          d.style.left = (cx - 20 + Math.random() * 40) + 'px';
+          d.style.top = (cy - 20 + Math.random() * 40) + 'px';
+          const colors2 = ['#e83f5c', '#753e90', '#ffcc00', '#ff6600', '#d63384'];
+          d.style.color = colors2[Math.floor(Math.random() * colors2.length)];
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 60 + Math.random() * 320;
+          d.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+          d.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+          d.style.setProperty('--r', (Math.random() * 1080 - 540) + 'deg');
+          d.style.animationDelay = (Math.random() * 0.2) + 's';
+          explosionOverlay.appendChild(d);
+        }
+
+        const chunkColors = ['#e83f5c', '#ef80b1', '#753e90', '#d63384', '#ff6b35'];
+        for (let i = 0; i < 15; i++) {
+          const c = document.createElement('div');
+          c.className = 'chunk';
+          const w = 6 + Math.random() * 18;
+          const h = 6 + Math.random() * 18;
+          c.style.width = w + 'px';
+          c.style.height = h + 'px';
+          c.style.background = chunkColors[Math.floor(Math.random() * chunkColors.length)];
+          c.style.left = (cx - 15 + Math.random() * 30) + 'px';
+          c.style.top = (cy - 15 + Math.random() * 30) + 'px';
+          c.style.borderRadius = Math.floor(Math.random() * 6) + 'px';
+          c.style.clipPath = Math.random() > 0.5 ? `polygon(${Math.random()*50}% 0, 100% ${Math.random()*50}%, ${Math.random()*50}% 100%, 0 ${Math.random()*50}%)` : '';
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 50 + Math.random() * 300;
+          c.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+          c.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+          c.style.setProperty('--r', (Math.random() * 720 - 360) + 'deg');
+          c.style.animationDelay = (Math.random() * 0.15) + 's';
+          explosionOverlay.appendChild(c);
         }
 
         svgEl.classList.add('svg-explode');
@@ -448,6 +637,8 @@
         svgEl.classList.remove('svg-explode');
         explosionOverlay.innerHTML = '';
         shakeOverlay.className = '';
+        flashOverlay.className = '';
+        shockwave.className = '';
         fullness = 1;
         corpo.classList.remove('inflated');
         gambe.classList.remove('inflated');
