@@ -170,6 +170,20 @@
       opacity: 0;
       pointer-events: none;
     }
+    #bocca {
+      transition: transform 0.12s ease-out;
+      transform-origin: 286px 396px;
+      transform: scale(1, 0.01);
+    }
+    #bocca.open {
+      transform: scale(1, 1);
+    }
+    #sorriso {
+      transition: opacity 0.12s ease-out;
+    }
+    #sorriso.closed {
+      opacity: 0;
+    }
     #corpo {
       transition: transform 0.3s ease-out;
       transform-origin: 296px 434px;
@@ -250,9 +264,12 @@
         <g id="TESTA">
           <path class="cls-3" d="M301.11,493.06c47.75-.04,82.13,19.2,95.75,27.83,22.34-41.71,23.46-83.93,2.66-105.53-4.18-4.34-10.67-9.33-20.84-12.69,1.07-3.33,7.56-24.67-4.83-43.79-5.71-8.81-13.18-13.68-17.74-16.13,9.09-16.02,4.89-36.34-9.41-47.18-14.93-11.32-36.75-9.17-49.47,5.3-12.4-13.91-33.57-16.05-48.38-5.01-14.6,10.88-18.74,31.36-9.41,47.18-4.56,2.44-12.03,7.31-17.74,16.13-12.39,19.13-5.9,40.47-4.83,43.79-10.08,3.35-16.59,8.29-20.84,12.69-21.43,22.15-20.02,65.95,3.3,109.48,13-9.04,49.69-32.01,101.78-32.06Z"/>
           <circle class="cls-2" cx="296.28" cy="373.46" r="59.8"/>
-          <g>
+          <g id="bocca">
             <path class="cls-9" d="M275.98,382.45c.8,11.21,9.68,20,20.16,20.7,11.58.77,22.32-8.53,23.11-20.99-14.42.1-28.85.19-43.27.29Z"/>
             <path class="cls-8" d="M275.26,382.64c.72,9.06,6.82,17.22,15.54,20.03s17.53-.18,23.31-6.62c3.47-3.86,5.51-8.79,5.88-13.96.03-.37-.38-.45-.66-.45-14.42.1-28.85.19-43.27.29-.81,0-1.13,1.02-.14,1.02,14.42-.1,28.85-.19,43.27-.29l-.66-.45c-.6,8.44-5.93,16.13-13.92,19.17s-17.01.34-22.53-6.07c-3.16-3.67-4.99-8.25-5.37-13.07-.05-.63-1.5-.29-1.45.39Z"/>
+          </g>
+          <g id="sorriso">
+            <path d="M274,393 Q286,404 299,393" fill="none" stroke="#b83e18" stroke-width="3.5" stroke-linecap="round"/>
           </g>
           <path class="cls-3" d="M366.91,319.08c.79,14.18-7.87,31.69-26.15,35.85-15.13,3.45-31.82-3.41-40.11-17.11-9.17,12.75-25.49,19.25-41.13,16.48-17.47-3.1-31.86-17.37-31.87-34.41-.01-15.48,11.83-28.27,26.34-33.08,15.21-5.05,32.52-1.05,43.7,10.19,1.85-1.82,14.08-13.52,31.99-12.52,19.19,1.08,36.21,16.24,37.24,34.61Z"/>
           <ellipse class="cls-4" cx="285.41" cy="365.29" rx="8.75" ry="6.23"/>
@@ -322,7 +339,10 @@
       let explosionTarget = pickExplosionTarget();
       let isExploded = false;
       let isEating = false;
+      let isMouthOpen = false;
       let fullness = 1;
+      const bocca = svgEl.querySelector('#bocca');
+      const sorriso = svgEl.querySelector('#sorriso');
       const originalTransforms = new Map();
       const corpo = svgEl.querySelector('#corpo');
       const gambe = svgEl.querySelector('#gambe');
@@ -330,6 +350,17 @@
       const leftEye = { cx: 285.41, cy: 365.29 };
       const rightEye = { cx: 309.83, cy: 365.29 };
       const maxDx = 3.65, maxDy = 1.13;
+
+      function openMouth() {
+        isMouthOpen = true;
+        bocca.classList.add('open');
+        sorriso.classList.add('closed');
+      }
+      function closeMouth() {
+        isMouthOpen = false;
+        bocca.classList.remove('open');
+        sorriso.classList.remove('closed');
+      }
 
       function pickExplosionTarget() {
         return EXPLOSION_TRIGGERS[Math.floor(Math.random() * EXPLOSION_TRIGGERS.length)];
@@ -371,6 +402,7 @@
           if (isExploded) return;
           const g = findGroup(e.target);
           if (!g || g.dataset.eaten === 'true') return;
+          openMouth();
           const svgPt = toSvgCoords(e.clientX, e.clientY);
           dragEl = g;
           dragEl.classList.add('dragging');
@@ -399,6 +431,7 @@
         function onPointerUp() {
           if (dragEl) {
             dragEl.classList.remove('dragging');
+            closeMouth();
             dragEl = null;
           }
           document.removeEventListener('pointermove', onPointerMove);
@@ -431,6 +464,7 @@
         if (isEating) return;
         isEating = true;
         g.dataset.eaten = 'true';
+        closeMouth();
 
         eatenCount++;
         counter.textContent = '✧ ' + eatenCount;
@@ -632,6 +666,8 @@
       function resetGame() {
         isExploded = false;
         isEating = false;
+        closeMouth();
+        bocca.setAttribute('transform', '');
         eatenCount = 0;
         explosionTarget = pickExplosionTarget();
         counter.textContent = '✧ 0';
