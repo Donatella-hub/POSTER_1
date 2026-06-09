@@ -326,6 +326,10 @@
       const originalTransforms = new Map();
       const corpo = svgEl.querySelector('#corpo');
       const gambe = svgEl.querySelector('#gambe');
+      const pupils = svgEl.querySelectorAll('#TESTA .cls-6');
+      const leftEye = { cx: 285.41, cy: 365.29 };
+      const rightEye = { cx: 309.83, cy: 365.29 };
+      const maxDx = 3.65, maxDy = 1.13;
 
       function pickExplosionTarget() {
         return EXPLOSION_TRIGGERS[Math.floor(Math.random() * EXPLOSION_TRIGGERS.length)];
@@ -658,6 +662,31 @@
       }
 
       initDrag();
+
+      const eyeCenters = [
+        { cx: 285.41, cy: 365.29, el: pupils[0] },
+        { cx: 309.83, cy: 365.29, el: pupils[1] }
+      ];
+      svgEl.addEventListener('mousemove', (e) => {
+        if (isExploded) return;
+        const pt = toSvgCoords(e.clientX, e.clientY);
+        for (const eye of eyeCenters) {
+          if (!eye.el) continue;
+          const dx = pt.x - eye.cx;
+          const dy = pt.y - eye.cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 0.1) continue;
+          const nx = Math.min(maxDx, Math.abs(dx)) * Math.sign(dx);
+          const ny = Math.min(maxDy, Math.abs(dy)) * Math.sign(dy);
+          eye.el.setAttribute('transform', `translate(${nx}, ${ny})`);
+        }
+      });
+      svgEl.addEventListener('mouseleave', () => {
+        for (const eye of eyeCenters) {
+          if (eye.el) eye.el.setAttribute('transform', '');
+        }
+      });
+
       resetBtn.addEventListener('click', resetGame);
     })();
   </script>
