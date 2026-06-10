@@ -474,10 +474,172 @@
         }
       }
 
+      function createGnAmBuffer(ctx) {
+        const sampleRate = ctx.sampleRate;
+        const duration = 0.35;
+        const length = Math.floor(sampleRate * duration);
+        const buf = ctx.createBuffer(1, length, sampleRate);
+        const data = buf.getChannelData(0);
+
+        // Parametri temporali in campioni
+        const gEnd = Math.floor(sampleRate * 0.06);     // "G" gutturale: impulso + buzz basso
+        const naEnd = Math.floor(sampleRate * 0.20);    // "na" vocale: sawtooth intorno a 400Hz
+        const mEnd = Math.floor(sampleRate * 0.35);     // "m" labiale: decadimento sinusoidale ~180->60Hz
+
+        for (let i = 0; i < length; i++) {
+          const t = i / sampleRate;
+          let val = 0;
+          let env = 1;
+
+          if (i < gEnd) {
+            // --- FASE G (gutturale + click) ---
+            const prog = i / gEnd; // 0→1
+            // Buzz grave molto distorto
+            const freq = 120 + prog * 80; // 120→200Hz
+            val = Math.sin(2 * Math.PI * freq * t);
+            // Aggiungi click random per la percussione della G
+            if (prog < 0.3) val += (Math.random() * 2 - 1) * (1 - prog * 3) * 0.6;
+            // Distorsione pesante per rendere gutturale
+            val = Math.tanh(val * 3.5);
+            env = 1 - prog * 0.2; // leggero decay
+          } else if (i < naEnd) {
+            // --- FASE NA (vocale aperta) ---
+            const prog = (i - gEnd) / (naEnd - gEnd);
+            // Frequenza fondamentale ~380Hz con vibrato naturale
+            const freq = 380 + Math.sin(prog * Math.PI * 6) * 15;
+            val = 0;
+            // Somma armoniche per timbro vocale saw-like
+            for (let h = 1; h <= 7; h++) {
+              const amp = 1 / (h * 0.8 + 0.5);
+              val += Math.sin(2 * Math.PI * freq * h * t) * amp;
+            }
+            // Envelope: attacco rapido, sustain, release
+            if (prog < 0.15) env = prog / 0.15;
+            else if (prog > 0.7) env = 1 - (prog - 0.7) / 0.3;
+            else env = 1;
+          } else {
+            // --- FASE M (chiusura nasale/labiale) ---
+            const prog = (i - naEnd) / (mEnd - naEnd);
+            // Frequenza che scende 180→60Hz (chiusura bocca)
+            const freq = 180 * Math.pow(60 / 180, prog);
+            val = Math.sin(2 * Math.PI * freq * t);
+            // Aggiungi leggero rumore per la "nasalità"
+            val += (Math.random() * 2 - 1) * 0.08 * (1 - prog);
+            // Decadimento rapido
+            env = Math.pow(1 - prog, 2.5);
+          }
+
+          data[i] = val * env * 0.55; // gain master
+        }
+        return buf;
+      }
+
+      function playGnamSound() {
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          const ctx = new AudioCtx();
+
+          // Buffer PCM "gnam" generato
+          const buf = createGnAmBuffer(ctx);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+
+          // Filtro per renderlo più "morbido" e vocale
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.value = 450;
+          filter.Q.value = 0.8;
+
+          // Gain finale
+          const gain = ctx.createGain();
+          gain.gain.value = 1.0;
+
+          src.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          src.start(ctx.currentTime);
+          src.stop(ctx.currentTime + 0.4);
+
+          // Chiudi il contesto dopo l'uso per evitare leak
+          setTimeout(() => ctx.close(), 800);
+        } catch(e) {}
+      }
+
+      function playExplosionSound() {
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          const ctx = new AudioCtx();
+          const t = ctx.currentTime;
+
+          // === BOOM: sweep di basso profondo ===
+          const boom = ctx.createOscillator();
+          const boomGain = ctx.createGain();
+          boom.type = 'sine';
+          boom.frequency.setValueAtTime(180, t);
+          boom.frequency.exponentialRampToValueAtTime(15, t + 0.6);
+          boomGain.gain.setValueAtTime(0.9, t);
+          boomGain.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+          boom.connect(boomGain);
+          boomGain.connect(ctx.destination);
+          boom.start(t);
+          boom.stop(t + 0.75);
+
+          // === Distorsione / clipping aggressive ===
+          const dist = ctx.createWaveShaper();
+          const k = 20;
+          const nSamples = 44100;
+          const curve = new Float32Array(nSamples);
+          for (let i = 0; i < nSamples; i++) {
+            const x = (i * 2) / nSamples - 1;
+            curve[i] = (3 + k) * x * 20 * (Math.PI / 180) / (Math.PI + k * Math.abs(x));
+          }
+          dist.curve = curve;
+
+          // === Rumore bianco con decadimento rapido ===
+          const bufferSize = ctx.sampleRate * 0.5;
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+          }
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+          const noiseGain = ctx.createGain();
+          noiseGain.gain.setValueAtTime(0.8, t);
+          noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+          const noiseFilter = ctx.createBiquadFilter();
+          noiseFilter.type = 'lowpass';
+          noiseFilter.frequency.setValueAtTime(4000, t);
+          noiseFilter.frequency.exponentialRampToValueAtTime(200, t + 0.5);
+          noise.connect(noiseFilter);
+          noiseFilter.connect(dist);
+          dist.connect(noiseGain);
+          noiseGain.connect(ctx.destination);
+          noise.start(t);
+          noise.stop(t + 0.55);
+
+          // === Crack / snap iniziale ===
+          const snap = ctx.createOscillator();
+          const snapGain = ctx.createGain();
+          snap.type = 'sawtooth';
+          snap.frequency.setValueAtTime(3000, t);
+          snap.frequency.exponentialRampToValueAtTime(200, t + 0.08);
+          snapGain.gain.setValueAtTime(0.4, t);
+          snapGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+          snap.connect(snapGain);
+          snapGain.connect(ctx.destination);
+          snap.start(t);
+          snap.stop(t + 0.12);
+        } catch(e) {}
+      }
+
       function eatLetter(g) {
         if (isEating) return;
         isEating = true;
         g.dataset.eaten = 'true';
+        playGnamSound();
         closeMouth();
 
         eatenCount++;
@@ -635,6 +797,7 @@
 
         svgEl.classList.add('svg-explode');
         shatterCharacter();
+        playExplosionSound();
 
         setTimeout(() => { resetBtn.style.display = 'block'; }, 1500);
       }
